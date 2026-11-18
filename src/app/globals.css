@@ -1,0 +1,103 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #000000;
+  background-image: radial-gradient(#111a2e 1px, transparent 1px);
+  background-size: 16px 16px;
+  color: #ffffff;
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Classic 2008 Glossy Category Tabs */
+.cmg-tab {
+  display: inline-block;
+  padding: 8px 16px;
+  font-weight: 900;
+  font-size: 14px;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #000000;
+  border-radius: 8px 8px 0 0;
+  border: 2px solid #ffffff;
+  border-bottom: none;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: transform 0.1s ease;
+}
+
+.cmg-tab:hover {
+  transform: translateY(-2px);
+}
+
+.tab-lime {
+  background: linear-gradient(180deg, #b8ff3b 0%, #66cc00 100%);
+}
+
+.tab-cyan {
+  background: linear-gradient(180deg, #66ffff 0%, #0099cc 100%);
+}
+
+.tab-orange {
+  background: linear-gradient(180deg, #ffcc33 0%, #ff6600 100%);
+}
+
+.tab-pink {
+  background: linear-gradient(180deg, #ff99cc 0%, #ff0066 100%);
+}
+
+/* Classic Portal Panels */
+.cmg-box {
+  background: #0d1526;
+  border: 3px solid #66cc00;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 0 15px rgba(102, 204, 0, 0.25);
+}
+
+.cmg-box-header {
+  background: linear-gradient(90deg, #66cc00 0%, #0099cc 100%);
+  color: #000000;
+  font-weight: 900;
+  font-size: 16px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin: -6px -6px 14px -6px;
+  text-transform: uppercase;
+}
+
+/* Glossy Play Button */
+.cmg-play-btn {
+  display: inline-block;
+  background: linear-gradient(180deg, #ff9900 0%, #ff5500 100%);
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 13px;
+  padding: 7px 14px;
+  border: 2px solid #ffffff;
+  border-radius: 20px;
+  text-decoration: none;
+  text-shadow: 1px 1px 2px #000000;
+  cursor: pointer;
+}
+
+.cmg-play-btn:hover {
+  background: linear-gradient(180deg, #ffbb33 0%, #ff7700 100%);
+}
+
+/* Game Card Tile */
+.cmg-game-card {
+  background: #14223d;
+  border: 2px solid #00ccff;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.cmg-game-card:hover {
+  border-color: #b8ff3b;
+  transform: scale(1.03);
+}
