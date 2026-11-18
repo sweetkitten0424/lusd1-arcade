@@ -1,90 +1,152 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import RufflePlayer from "./RufflePlayer";
+import { fetchFromRails } from "@/lib/arcadeApi";
 
-async function GameContent({ params }) {
-  const { slug } = await params;
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-  const res = await fetch(`${apiUrl}/api/games/${slug}`, { cache: "no-store" });
-
-  if (!res.ok) {
-    return (
-      <div className="cmg-box">
-        <h2>Game Not Found!</h2>
-        <Link href="/" className="cmg-play-btn">◀ Back to Games</Link>
-      </div>
-    );
-  }
-
-  const { game, leaderboard } = await res.json();
+async function PlayerBox() {
+  const res = await fetchFromRails("/api/me");
+  const player = res.ok ? await res.json() : null;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      {/* Game Theater Box */}
-      <div className="cmg-box">
-        <div
-          className="cmg-box-header"
-          style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-        >
-          <span>🕹️ Now Playing: {game.title}</span>
-          <Link
-            href="/"
-            style={{
-              background: "#000",
-              color: "#b8ff3b",
-              padding: "3px 10px",
-              borderRadius: "6px",
-              fontSize: "12px",
-              textDecoration: "none",
-            }}
-          >
-            ◀ Back to All Games
-          </Link>
-        </div>
-
-        <RufflePlayer swfUrl={game.file_path} />
+    <div className="cmg-box" style={{ padding: "10px", width: "100%", borderColor: "#ff9900" }}>
+      <div
+        className="cmg-box-header"
+        style={{ background: "linear-gradient(90deg, #ff9900, #ff5500)", color: "#fff", fontSize: "12px" }}
+      >
+        ★ 1UP Player
       </div>
-
-      {/* Classic High Score Leaderboard Box */}
-      <div className="cmg-box" style={{ borderColor: "#ff9900" }}>
-        <div className="cmg-box-header" style={{ background: "linear-gradient(90deg, #ffcc33, #ff6600)" }}>
-          🏆 High Scores — Top 10 Players
-        </div>
-        {leaderboard.length === 0 ? (
-          <p style={{ fontSize: "13px", color: "#ccddee", margin: 0 }}>
-            No high scores recorded yet. Be the first to get on the board!
+      {player ? (
+        <div>
+          <p style={{ fontSize: "12px", color: "#b8ff3b", fontWeight: "bold", margin: "0 0 4px 0" }}>
+            Welcome, {player.username}!
           </p>
-        ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-            <thead>
-              <tr style={{ borderBottom: "2px solid #ff9900", color: "#ffcc33", textAlign: "left" }}>
-                <th style={{ padding: "6px" }}>Rank</th>
-                <th style={{ padding: "6px" }}>Player</th>
-                <th style={{ padding: "6px" }}>Score</th>
-                <th style={{ padding: "6px" }}>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {leaderboard.map((entry, idx) => (
-                <tr key={idx} style={{ borderBottom: "1px solid #1f3356" }}>
-                  <td style={{ padding: "6px", fontWeight: "bold", color: "#b8ff3b" }}>#{idx + 1}</td>
-                  <td style={{ padding: "6px" }}>{entry.username}</td>
-                  <td style={{ padding: "6px", color: "#66ffff", fontWeight: "bold" }}>{entry.points}</td>
-                  <td style={{ padding: "6px", color: "#8899aa" }}>{entry.date}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+          <p style={{ fontSize: "10px", color: "#8899aa", margin: "0 0 10px 0", wordBreak: "break-all" }}>
+            {player.email}
+          </p>
+          <a
+            href="/cdn-cgi/access/logout"
+            className="cmg-play-btn"
+            style={{ width: "100%", textAlign: "center", fontSize: "11px", background: "#cc0033" }}
+          >
+            Log Out
+          </a>
+        </div>
+      ) : (
+        <a
+          href="/cdn-cgi/access/login?redirect_url=/"
+          className="cmg-play-btn"
+          style={{ width: "100%", textAlign: "center", fontSize: "11px" }}
+        >
+          Sign In with Cloudflare
+        </a>
+      )}
     </div>
   );
 }
 
-export default function GamePage({ params }) {
+async function GamePortalGrid() {
+  const res = await fetchFromRails("/api/games");
+  const games = res.ok ? await res.json() : [];
+
   return (
-    <Suspense fallback={<p style={{ color: "#b8ff3b", fontWeight: "bold" }}>Loading Flash Game...</p>}>
-      <GameContent params={params} />
-    </Suspense>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "12px" }}>
+      {games.map((game) => (
+        <div key={game.id} className="cmg-game-card">
+          <div
+            style={{
+              height: "90px",
+              background: "linear-gradient(135deg, #003366 0%, #006699 100%)",
+              border: "2px solid #ffffff",
+              borderRadius: "6px",
+              marginBottom: "8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "14px",
+              fontWeight: 900,
+              color: "#b8ff3b",
+              padding: "6px",
+              textShadow: "1px 1px 2px #000",
+            }}
+          >
+            {game.title}
+          </div>
+
+          <h3 style={{ fontSize: "14px", margin: "0 0 6px 0", color: "#ffffff" }}>{game.title}</h3>
+          <div style={{ fontSize: "11px", color: "#66ffff", marginBottom: "8px", fontWeight: "bold" }}>
+            {game.system.toUpperCase()} GAME
+          </div>
+
+          <Link href={`/play/${game.slug}`} className="cmg-play-btn" style={{ fontSize: "12px", padding: "5px 12px" }}>
+            PLAY ▶
+          </Link>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function HomePage() {
+  const leftButtons = [
+    { file: "button-new-games.gif", alt: "New Games" },
+    { file: "button-coolmath-top-10.gif", alt: "Coolmath Top 10" },
+    { file: "button-karens-faves.gif", alt: "Karen's Faves" },
+    { file: "button-flash-games.gif", alt: "Flash Games" },
+    { file: "button-java-games.gif", alt: "Java Games" },
+    { file: "button-math-games.gif", alt: "Math Games" },
+  ];
+
+  const rightPromos = [
+    { file: "140-store.gif", alt: "Coolmath Store" },
+    { file: "140-math-books.gif", alt: "Math Books" },
+    { file: "140-addvert.gif", alt: "Featured" },
+  ];
+
+  const aaBadges = ["aa-1.gif", "aa-2.gif", "aa-3.gif", "aa-4.gif", "aa-5.gif", "aa-6.gif"];
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "175px 1fr 155px", gap: "12px", alignItems: "start" }}>
+      <aside style={{ display: "flex", flexDirection: "column", gap: "6px", alignItems: "center" }}>
+        {leftButtons.map((btn) => (
+          <Link key={btn.file} href="/" style={{ lineHeight: 0 }}>
+            <img src={`/gifs/${btn.file}`} alt={btn.alt} style={{ maxWidth: "100%", height: "auto", display: "block" }} />
+          </Link>
+        ))}
+        <div style={{ marginTop: "6px" }}>
+          <img src="/gifs/ADblockL.gif" alt="" style={{ maxWidth: "100%", height: "auto", display: "block" }} />
+        </div>
+      </aside>
+
+      <section className="cmg-box" style={{ padding: "12px" }}>
+        <div style={{ textAlign: "center", marginBottom: "12px" }}>
+          <img src="/gifs/header-thinking-games.gif" alt="Thinking Games" style={{ maxWidth: "100%", height: "auto" }} />
+        </div>
+
+        <Suspense fallback={<p style={{ color: "#b8ff3b", fontWeight: "bold", textAlign: "center" }}>Loading Flash Games...</p>}>
+          <GamePortalGrid />
+        </Suspense>
+
+        <div style={{ textAlign: "center", marginTop: "22px", paddingTop: "14px", borderTop: "2px dashed #66cc00" }}>
+          <img src="/gifs/header-jigsaw-puzzles.gif" alt="Jigsaw Puzzles" style={{ maxWidth: "100%", height: "auto" }} />
+        </div>
+      </section>
+
+      <aside style={{ display: "flex", flexDirection: "column", gap: "8px", alignItems: "center" }}>
+        <Suspense fallback={<div className="cmg-box" style={{ width: "100%", fontSize: "11px" }}>Checking 1UP...</div>}>
+          <PlayerBox />
+        </Suspense>
+
+        {rightPromos.map((promo) => (
+          <img key={promo.file} src={`/gifs/${promo.file}`} alt={promo.alt} style={{ maxWidth: "100%", height: "auto" }} />
+        ))}
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "4px" }}>
+          {aaBadges.map((badge) => (
+            <img key={badge} src={`/gifs/${badge}`} alt="" style={{ maxWidth: "100%", height: "auto" }} />
+          ))}
+        </div>
+
+        <img src="/gifs/ADblockR.gif" alt="" style={{ maxWidth: "100%", height: "auto" }} />
+      </aside>
+    </div>
   );
 }
